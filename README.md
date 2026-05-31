@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Website Content Auditor
+
+Audit websites by crawling internal pages, capturing SEO and accessibility signals, and exporting results. The crawler respects robots.txt, throttles requests, and stores results in Supabase.
+
+## Features
+
+- Crawl internal pages with depth and page limits
+- Respect robots.txt directives
+- Capture titles, meta descriptions, headings, word count, links, and images
+- Screenshot every page with Playwright
+- Detect broken links and missing assets
+- Generate SEO and accessibility issue lists
+- Store results in Supabase and display in a dashboard
+- Export runs as CSV or JSON
 
 ## Getting Started
 
-First, run the development server:
+### 1) Configure Supabase
+
+Run the SQL in `supabase/schema.sql` against your Supabase project.
+
+### 2) Configure environment variables
+
+Copy `.env.example` to `.env.local` and fill in the values:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SUPABASE_URL=
+CRAWLER_MAX_DEPTH=2
+CRAWLER_MAX_PAGES=50
+CRAWLER_DELAY_MS=1200
+CRAWLER_LINK_CONCURRENCY=6
+CRAWLER_ASSET_CONCURRENCY=4
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3) Install dependencies and run locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npx playwright install --with-deps
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open `http://localhost:3000` and start a crawl.
 
-## Learn More
+## Deployment (Vercel)
 
-To learn more about Next.js, take a look at the following resources:
+1. Add the environment variables in your Vercel project settings.
+2. Ensure the Supabase schema has been applied.
+3. Deploy the project.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> Playwright requires a compatible runtime. Vercel Node functions should be configured to allow longer execution for crawl routes.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Endpoints
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `POST /api/crawl` — start a crawl
+- `GET /api/runs` — list crawl runs
+- `GET /api/runs/:runId` — run details and JSON export
+- `GET /api/runs/:runId?format=csv` — CSV export
